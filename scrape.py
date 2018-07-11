@@ -26,26 +26,25 @@ page = urllib2.urlopen(url)
 soup = BeautifulSoup(page.read())
 parser = HTMLParser.HTMLParser()
 
-poems = soup.find_all('a',href=re.compile('.*/poetrymagazine/browse/.*'))
+poems = soup.find_all('a',href=re.compile('.*/poems/[0-9]+/.*'))
 poems2 = soup.find_all('a',href=re.compile('.*/poem/.*'))
 
 poems.extend(poems2)
 
 for poem in poems:
 
-
-    poemURL = 'http://www.poetryfoundation.org' + poem.get('href')
+    poemURL = poem.get('href')
     poemPage = urllib2.urlopen(poemURL)
     poemSoup = BeautifulSoup(poemPage.read())
     
-    poemTitle = poemSoup.find('div',{'id':'poem-top'})
+    poemTitle = poemSoup.find('h1')
     
     if poemTitle:
         print(parser.unescape(poemTitle.text).encode('utf8'),file=output)
         
-        poemContent = poemSoup.find_all('div',{'class':'poem'})
-        
-        for line in poemContent:
+        poemContent = poemSoup.find('div',{'class':'o-poem'})
+        poemLines = poemContent.findAll('div')
+        for line in poemLines:
             text = parser.unescape(line.text)
             out = text.encode('utf8')
             print(out,file=output)
